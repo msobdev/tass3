@@ -1,10 +1,34 @@
 from bs4 import BeautifulSoup
 import requests
 
+from polon.getting_data import getPatentByRow
+
+def add_patent_authors_to_graph():
+    patent = getPatentByRow('C:\\MyProjects\\TASS\\tass3\\polon\\Technologia.csv', 1)
+    print(patent)
+    authors = patent.get('authors')
+    authors = authors.split("/")
+    print(authors)
+    final_connections = ""
+    for author in authors:
+        author = author.split(" ")
+        if len(author) == 3:
+            author[1] = author[1] + "-" + author[2]
+        print(author)
+        connections = add_author_to_graph(author[0], author[1], None)
+        print(connections)
+        if connections is not None:
+            final_connections = final_connections + "," + connections
+    final_connections = final_connections[:-1]
+    print(final_connections)
+    return final_connections
+
 
 def add_author_to_graph(name, surname, institute):
     link = find_author_link(name, surname, institute)
     main_author = name + "_" + surname
+    if link is None:
+        return
     publications = get_publications(link)
     full_author_list = []
     for publication in publications:
@@ -19,27 +43,35 @@ def add_author_to_graph(name, surname, institute):
             final_string = final_string + main_author + "/" + author + "-" + str(counted_list.get(author)) + ","
     final_string = final_string[:-1]
     print(final_string)
+    return final_string
 
 
 def find_author_link(name, surname, institute):
     search_link = "https://www.researchgate.net/search/authors?q=" + name + "%2B" + surname
+    print(search_link)
     page = requests.get(search_link)
     contents = page.content
     soup = BeautifulSoup(contents, 'html.parser')
-    found_authors = soup.find_all('div', class_='account-container')
+    print(soup)
 
+    found_authors = soup.find_all('div', class_='account-container')
     for author in found_authors:
         author_name = author.find('div', class_='name')
 
-        author_institution = author.find('div', class_='institution')
-        if author_institution is not None and author_institution.get_text() == institute:
-            # print(author_name.get_text())
-            # print(author_institution.get_text())
-            account_link = author_name.a.get('href')
-            account_link = (account_link.split("?", 1))[0]
-            account_link = account_link[29:]
-            # print(account_link)
-            return account_link
+        # author_institution = author.find('div', class_='institution')
+        # if author_institution is not None and author_institution.get_text() == institute:
+        #     # print(author_name.get_text())
+        #     # print(author_institution.get_text())
+        #     account_link = author_name.a.get('href')
+        #     account_link = (account_link.split("?", 1))[0]
+        #     account_link = account_link[29:]
+        #     # print(account_link)
+        #     return account_link
+
+        account_link = author_name.a.get('href')
+        account_link = (account_link.split("?", 1))[0]
+        account_link = account_link[29:]
+        return account_link
 
 
 def get_institute(author_link):
@@ -74,11 +106,17 @@ def get_publication_authors(publication):
     return author_list
 
 
-name = "Piotr"
-surname = "Arabas"
-institute = "Warsaw University of Technology"
-add_author_to_graph(name, surname, institute)
+add_patent_authors_to_graph()
+
+# name = "Piotr"
+# surname = "Arabas"
+# institute = "Warsaw University of Technology"
+# add_author_to_graph(name, surname, institute)
+
+
+
 # link = find_author_link(name, surname, institute)
+# print(link)
 # print(get_institute(link))
 
 # research = researches[0]
