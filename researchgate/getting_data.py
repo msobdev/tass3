@@ -1,11 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
-
 from polon.getting_data import getPatentByRow
 
-def add_patent_authors_to_graph():
-    patent = getPatentByRow('C:\\MyProjects\\TASS\\tass3\\polon\\Technologia.csv', 1)
-    print(patent)
+def add_patent_authors_to_graph(csvFile):
+    patent = getPatentByRow(csvFile, 1)
+    # print(patent)
     authors = patent.get('authors')
     authors = authors.split("/")
     print(authors)
@@ -14,11 +13,11 @@ def add_patent_authors_to_graph():
         author = author.split(" ")
         if len(author) == 3:
             author[1] = author[1] + "-" + author[2]
-        print(author)
+        # print(author)
         connections = add_author_to_graph(author[0], author[1], None)
-        print(connections)
+        # print(connections)
         if connections is not None:
-            final_connections = final_connections + "," + connections
+            final_connections = final_connections + ";" + connections
     final_connections = final_connections[:-1]
     print(final_connections)
     return final_connections
@@ -40,7 +39,7 @@ def add_author_to_graph(name, surname, institute):
     # print(counted_list)
     for author in full_author_list:
         if main_author != author:
-            final_string = final_string + main_author + "/" + author + "-" + str(counted_list.get(author)) + ","
+            final_string = final_string + main_author + "/" + author + "-" + str(counted_list.get(author)) + ";"
     final_string = final_string[:-1]
     print(final_string)
     return final_string
@@ -48,8 +47,9 @@ def add_author_to_graph(name, surname, institute):
 
 def find_author_link(name, surname, institute):
     search_link = "https://www.researchgate.net/search/authors?q=" + name + "%2B" + surname
-    print(search_link)
-    page = requests.get(search_link)
+    # print(search_link)
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    page = requests.get(search_link, headers=headers, timeout=5)
     contents = page.content
     soup = BeautifulSoup(contents, 'html.parser')
     print(soup)
@@ -75,7 +75,8 @@ def find_author_link(name, surname, institute):
 
 
 def get_institute(author_link):
-    page = requests.get("https://www.researchgate.net/" + author_link)
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    page = requests.get("https://www.researchgate.net/" + author_link, headers=headers, timeout=5)
     contents = page.content
     soup = BeautifulSoup(contents, 'html.parser')
     s_institution = soup.find('div', class_="institution")
@@ -83,7 +84,8 @@ def get_institute(author_link):
     return s_institution.get_text()
 
 def get_publications(author_link):
-    page = requests.get("https://www.researchgate.net/" + author_link)
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    page = requests.get("https://www.researchgate.net/" + author_link, headers=headers, timeout=5)
     contents = page.content
     soup = BeautifulSoup(contents, 'html.parser')
     # print(soup.prettify())
@@ -106,21 +108,8 @@ def get_publication_authors(publication):
     return author_list
 
 
-add_patent_authors_to_graph()
+# add_patent_authors_to_graph('../polon/Technologia.csv')
 
-# name = "Piotr"
-# surname = "Arabas"
+name = "Piotr"
+surname = "Arabas"
 # institute = "Warsaw University of Technology"
-# add_author_to_graph(name, surname, institute)
-
-
-
-# link = find_author_link(name, surname, institute)
-# print(link)
-# print(get_institute(link))
-
-# research = researches[0]
-# getPublicationAuthors(research)
-# print(research.prettify())
-# print(soup.prettify())
-

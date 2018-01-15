@@ -72,7 +72,9 @@ def addRow(filename, patentRow):
 #print(getDistinctPatentTypes('cleanpatents.csv'))
 #createCsvWithPatentType('cleanpatents.csv', 'Technologia')
 #print(getPatentByID('Wynalazek.csv', '213836').get('title'))
-#print(getPatentByRow('Technologia.csv', 1))
+# print(getPatentByRow('Technologia.csv', 1))
+# print(getPatentByRow('Technologia.csv', 1).get('authors'))
+
 #print((getPatentsList('Technologia.csv')[0]['patentID']))
 
 #createCsvByCopying('Technologia.csv', 'test.csv')
