@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
 from polon.getting_data import getPatentByRow
+import urllib3
+import time
 
 def add_patent_authors_to_graph(csvFile):
     patent = getPatentByRow(csvFile, 1)
@@ -49,7 +51,8 @@ def find_author_link(name, surname, institute):
     search_link = "https://www.researchgate.net/search/authors?q=" + name + "%2B" + surname
     # print(search_link)
     headers = {'User-Agent': 'Mozilla/5.0'}
-    page = requests.get(search_link, headers=headers, timeout=5)
+    page = requests.get(search_link, headers=headers, timeout=urllib3.Timeout(connect=2.0, read=2.0))
+    time.sleep(5)
     contents = page.content
     soup = BeautifulSoup(contents, 'html.parser')
     print(soup)
@@ -76,7 +79,8 @@ def find_author_link(name, surname, institute):
 
 def get_institute(author_link):
     headers = {'User-Agent': 'Mozilla/5.0'}
-    page = requests.get("https://www.researchgate.net/" + author_link, headers=headers, timeout=5)
+    page = requests.get("https://www.researchgate.net/" + author_link, headers=headers, timeout=urllib3.Timeout(connect=2.0, read=2.0))
+    time.sleep(5)
     contents = page.content
     soup = BeautifulSoup(contents, 'html.parser')
     s_institution = soup.find('div', class_="institution")
@@ -85,7 +89,8 @@ def get_institute(author_link):
 
 def get_publications(author_link):
     headers = {'User-Agent': 'Mozilla/5.0'}
-    page = requests.get("https://www.researchgate.net/" + author_link, headers=headers, timeout=5)
+    page = requests.get("https://www.researchgate.net/" + author_link, headers=headers, timeout=urllib3.Timeout(connect=2.0, read=2.0))
+    time.sleep(5)
     contents = page.content
     soup = BeautifulSoup(contents, 'html.parser')
     # print(soup.prettify())
@@ -108,7 +113,7 @@ def get_publication_authors(publication):
     return author_list
 
 
-# add_patent_authors_to_graph('../polon/Technologia.csv')
+add_patent_authors_to_graph('../polon/Technologia.csv')
 
 name = "Piotr"
 surname = "Arabas"
